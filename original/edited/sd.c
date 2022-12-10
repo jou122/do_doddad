@@ -407,11 +407,11 @@ void readstatus(void) {
     fprintf(stderr,"ioctl failed with code %d.\n",r);
     exit(1);
   }
-  ri=cd=dsr=cts=0;
-  if(status&TIOCM_CD) cd=1;
-  if(status&TIOCM_DSR) dsr=1;
-  if(status&TIOCM_CTS) cts=1;
-  if(status&TIOCM_RI) ri=1;
+  ri=cd=dsr=cts=1;
+  if(status&TIOCM_CD) cd=0;
+  if(status&TIOCM_DSR) dsr=0;
+  if(status&TIOCM_CTS) cts=0;
+  if(status&TIOCM_RI) ri=0;
 }
 
 void getonesample(void) {
@@ -474,9 +474,9 @@ void doprintdrift(long double ratio, int f_cpu) {
 
 void dtrpulse(int ontime, int offtime) {
   dtrtoggle();
-  usleep(ontime);
-  dtrtoggle();
   usleep(offtime);
+  dtrtoggle();
+  usleep(ontime);
 }
 
 void xmittictacstring() {
@@ -740,7 +740,7 @@ void mosi(uint8_t v) {
 
 uint8_t miso(void) {
   readstatus();
-  return(!cts);
+  return(cts);
 }
 
 void reseton(void) {
@@ -753,7 +753,7 @@ void resetoff(void) {
 
 void resetpulse(void) {
   c=0;
-  write(comfd,&c,1);
+  write(comfd,&c,0);
 }
 
 uint8_t xfr(uint8_t b) {
@@ -1003,7 +1003,7 @@ uint programinit(void) {
       usleep(50000);
       xfr(0xAC);
       xfr(0x53);
-      if(!xfrxpct(0x00,0x53)) n=10;
+      if(!xfrxpct(0x01,0x53)) n=10;
       xfr(0x00);
       n++;
     }
@@ -2082,3 +2082,4 @@ int main(int argc, char *argv[]) {
   if(timing) dotiming();
   exit(0);
 }
+
